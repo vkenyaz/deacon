@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Deacon - a shellscript utility for daily Orthodox 
+# scripture and fasting information for both Julian and Gregorian calendars
+# Vilyaem - https://vilyaem.xyz - Public Domain CC0
+
+function usage(){
+  printf "deacon - get daily orthodox information on the command line\n
+  by Vilyaem: https://vilyaem.xyz \& thekenyaz@yandex.com\n
+  This script is public domain.\n
+  usage:\n
+  -j - use julian/old calendar (default)\n
+  -g - use gregorian/new calendar\n
+  -i - interactive, uses \$PAGER to read text\n
+  -s - status bar mode, outputs minimal information\n
+  -h - display this information\n"
+  exit 0
+}
+
+# Test for presence of certain software
+function has(){
+  if ! "$@" &> /dev/null ; then
+    echo "This script requires '$1'."
+    exit 1
+  fi
+}
+
+has xq -v
+has w3m -v
+has curl --help
+
+# Handle arguments
+while getopts "jgish" opt; do
+  case "$opt" in
+    j) FEED=$(curl -s "https://orthocal.info/api/feed/julian/");;
+    g) FEED=$(curl -s "https://orthocal.info/api/feed/gregorian/");;
+    i) INTERACTIVE="1";;
+    s) STATUS="1";;
+    h) usage; exit 0 ;;
+    *) usage; exit 1 ;;
+  esac
+done
+
+# Get Julian feed anyway if user has not specified
+[ -z "$FEED" ] && FEED=$(curl -s "https://orthocal.info/api/feed/julian/")
+
+# Create the text
+OUTPUT=$(echo "$FEED" | xq --extract '//item[last()]' | w3m -T text/html -dump  | sed 's/\^//')
+# OUTPUT=$(echo "$FEED" | xq --extract '//rss' | w3m -T text/html -dump  | sed 's/\^//')
+
+if  [ -n "$INTERACTIVE" ] ; then
+  echo "$OUTPUT" | ${PAGER:-less}
+  exit 0
+fi
+
+if [ -n "$STATUS" ] ; then
+  echo "$OUTPUT" | grep -e "Fast" -e "Epistles" -e "Vespers" -e "Gospel)"
+  exit 0
+fi 
+
+if [ -z "$INTERACTIVE" ] && [ -z "$STATUS"  ] ; then
+  echo "$OUTPUT" | \
+    sed '
+  s/No Fast/\x1b[31mNo Fast\x1b[0m/
+  s/Fast /\x1b[34mFast\x1b[0m/
+  s/Commemorations/\x1b[30;44mCommemorations\x1b[0m/
+  s/Feasts/\x1b[30;44mFeasts\x1b[0m/
+  s/Scripture Readings/\x1b[30;44mScripture Readings\x1b[0m/
+  '
+fi
