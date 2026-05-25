@@ -1,9 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # Deacon - a shellscript utility for daily Orthodox 
 # scripture and fasting information for both Julian and Gregorian calendars
 # Vilyaem - https://vilyaem.xyz - Public Domain CC0
 
-function usage(){
+CACHEPATH="$HOME/.cache/deacondaily" # where cache is stored
+
+usage(){
   printf "deacon - get daily orthodox information on the command line\n
   by Vilyaem: https://vilyaem.xyz \& thekenyaz@yandex.com\n
   This script is public domain.\n
@@ -17,8 +19,8 @@ function usage(){
 }
 
 # Test for presence of certain software
-function has(){
-  if ! "$@" &> /dev/null ; then
+has(){
+  if ! "$@" >/dev/null 2>&1 ; then # messy posix
     echo "This script requires '$1'."
     exit 1
   fi
@@ -28,36 +30,60 @@ has xq -v
 has w3m -v
 has curl --help
 
+
 # Handle arguments
 while getopts "jgish" opt; do
   case "$opt" in
-    j) FEED=$(curl -s "https://orthocal.info/api/feed/julian/");;
-    g) FEED=$(curl -s "https://orthocal.info/api/feed/gregorian/");;
+    j) STYLE="julian";;
+    g) STYLE="gregorian";;
     i) INTERACTIVE="1";;
     s) STATUS="1";;
-    h) usage; exit 0 ;;
-    *) usage; exit 1 ;;
+    h) usage ;;
+    *) usage ;;
   esac
 done
 
-# Get Julian feed anyway if user has not specified
-[ -z "$FEED" ] && FEED=$(curl -s "https://orthocal.info/api/feed/julian/")
+CACHE=0
+
+if [ -z "$STYLE" ]; then # julian is the default
+    STYLE="julian"
+fi
+
+if [ -f "$CACHEPATH" ]; then
+    FILEDATE=$(sed -n '1p' "$CACHEPATH")
+    FILESTYLE=$(sed -n '2p' "$CACHEPATH")
+
+    if [ "$(date -I)" = "$FILEDATE" ] &&
+       [ "$STYLE" = "$FILESTYLE" ]; then
+        CACHE=1 # this should be retrieved
+    fi
+fi
+
+if [ "$CACHE" -eq 1 ]; then
+    FEED=$(tail -n +3 "$CACHEPATH") # ignore cache header
+else
+    FEED=$(curl -fsSL "https://orthocal.info/api/feed/$STYLE/")
+    mkdir -p "$(dirname "$CACHEPATH")" # make it if it doesn't exist
+    printf "%s\n%s\n%s\n" \ 
+        "$(date -I)" \
+        "$STYLE" \
+        "$FEED" > "$CACHEPATH" # write cache
+fi
 
 # Create the text
-OUTPUT=$(echo "$FEED" | xq --extract '//item[last()]' | w3m -T text/html -dump  | sed 's/\^//')
-# OUTPUT=$(echo "$FEED" | xq --extract '//rss' | w3m -T text/html -dump  | sed 's/\^//')
+OUTPUT=$(printf "%s" "$FEED" | xq --extract '//item[last()]' | w3m -T text/html -dump  | sed 's/\^//')
 
-if  [ -n "$INTERACTIVE" ] ; then
+if  [ -n "$INTERACTIVE" ] ; then # For interactive use, use a pager
   echo "$OUTPUT" | ${PAGER:-less}
   exit 0
 fi
 
-if [ -n "$STATUS" ] ; then
+if [ -n "$STATUS" ] ; then # For status/minimal output, give them the gist
   echo "$OUTPUT" | grep -e "Fast" -e "Epistles" -e "Vespers" -e "Gospel)"
   exit 0
 fi 
 
-if [ -z "$INTERACTIVE" ] && [ -z "$STATUS"  ] ; then
+if [ -z "$INTERACTIVE" ] && [ -z "$STATUS"  ] ; then # Normal colourized 
   echo "$OUTPUT" | \
     sed '
   s/No Fast/\x1b[31mNo Fast\x1b[0m/

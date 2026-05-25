@@ -5,18 +5,48 @@ both Julian and Gregorian calendars, for interactive or automated use. This
 script essentially parses RSS feeds provided by https://orthocal.info using
 'xq'.
 
+*Why did you make this?*
+
+I noticed there was no good (according to me) daily information software for
+*Julian Calendar* Orthodox Christians. It needs to be:
+
+- minimal
+- cli only (the most efficient computer interface)
+- easy to use on android via termux or termux shortcuts
+- have an offline cache
+- support automatic and pager usage
+- support both julian and gregorian calendars
+- be public-domain and free
+- be  self contained in one file
+- posix compliant, work everywhere
+
+I have found no other alternative. 
+
 ## Showcase
 
 <a href="https://asciinema.org/a/g8gkNIB79kWky41r" target="_blank"><img src="https://asciinema.org/a/g8gkNIB79kWky41r.svg" /></a>
 
+## Try it!
+
+```
+sh <( curl -fsSL https://codeberg.org/knyz/deacon/raw/branch/master/deacon)
+```
+
+## Download to ~/.local/bin/
+*Ensure $HOME/.local/bin/ is actually in your $PATH*
+```
+cd ~/.local/bin/ && curl -OfsSL "https://codeberg.org/knyz/deacon/raw/branch/master/deacon" && chmod +x deacon
+```
 ## Usage
 ```
   -j - use julian/old calendar (default)
   -g - use gregorian/new calendar
-  -i - interactive, uses \PAGER to read text
+  -i - interactive, uses PAGER to read text
   -s - status bar mode, outputs minimal information
   -h - display this information"
 ```
+## TODO
+- module plain-text prayer system, include a default set in this repo
 
 
 ## INFO
