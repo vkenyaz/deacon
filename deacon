@@ -60,14 +60,12 @@ if [ -f "$CACHEPATH" ]; then
 fi
 
 if [ "$CACHE" -eq 1 ]; then
-    FEED=$(tail -n +3 "$CACHEPATH") # ignore cache header
+    FEED=$(sed '1,2d' "$CACHEPATH") # ignore cache header
 else
     FEED=$(curl -fsSL "https://orthocal.info/api/feed/$STYLE/")
     mkdir -p "$(dirname "$CACHEPATH")" # make it if it doesn't exist
-    printf "%s\n%s\n%s\n" \ 
-        "$(date -I)" \
-        "$STYLE" \
-        "$FEED" > "$CACHEPATH" # write cache
+    # write the cache
+    printf "%s\n%s\n%s\n" "$(date -I)" "$STYLE" "$FEED" > "$CACHEPATH"
 fi
 
 # Create the text
