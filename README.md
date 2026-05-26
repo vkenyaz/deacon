@@ -22,6 +22,10 @@ I noticed there was no good (according to me) daily information software for
 
 I have found no other alternative. 
 
+Deacon however is not meant to be a general purpose commandline bible, there are
+tools like [diatheke](https://wiki.crosswire.org/Frontends:Diatheke), which do
+that job great enough.
+
 ## Showcase
 
 <a href="https://asciinema.org/a/g8gkNIB79kWky41r" target="_blank"><img src="https://asciinema.org/a/g8gkNIB79kWky41r.svg" /></a>
@@ -44,11 +48,21 @@ cd ~/.local/bin/ && curl -OfsSL "https://codeberg.org/knyz/deacon/raw/branch/mas
   -i - interactive, uses PAGER to read text
   -s - status bar mode, outputs minimal information
   -h - display this information"
+  -p - Use a prayer rule, which are plaintext files in ~/.local/share/prayers/
 ```
-## TODO
-- module plain-text prayer system, include a default set in this repo
+## Examples
+```
+# Read the Julian calendar readings and fasting information interactively
+deacon -ji
 
+# Read the Gregorian calendar readings, outputting to stdout
+deacon -g
 
+# Pray a prayer rule called 'seraphim', and read the Julian calendar readings
+# interactively
+
+deacon -ji -p seraphim
+```
 ## INFO
 Website: https://vilyaem.xyz
 

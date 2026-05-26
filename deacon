@@ -4,6 +4,8 @@
 # Vilyaem - https://vilyaem.xyz - Public Domain CC0
 
 CACHEPATH="$HOME/.cache/deacondaily" # where cache is stored
+PRAYERPATH="$HOME/.local/share/prayers/" # where prayer text files are stored
+VERSION="1.0"
 
 usage(){
   printf "deacon - get daily orthodox information on the command line\n
@@ -14,7 +16,9 @@ usage(){
   -g - use gregorian/new calendar\n
   -i - interactive, uses \$PAGER to read text\n
   -s - status bar mode, outputs minimal information\n
-  -h - display this information\n"
+  -h - display this information\n
+  -p - Use a prayer rule, which are plaintext files in ~/.local/share/prayers/\n
+  deacon version: %s\n", "$VERSION"
   exit 0
 }
 
@@ -32,16 +36,24 @@ has curl --help
 
 
 # Handle arguments
-while getopts "jgish" opt; do
+while getopts "jgishp:" opt; do
   case "$opt" in
     j) STYLE="julian";;
     g) STYLE="gregorian";;
     i) INTERACTIVE="1";;
     s) STATUS="1";;
+    p) 
+      if [ -f "$PRAYERPATH""$OPTARG" ] ; then
+        PRAYERFILE=$(cat "$PRAYERPATH""$OPTARG")
+      else
+        printf "Could not find a prayer text file @ %s, consider
+      downloading them from deacon's repository." "$PRAYERPATH$OPTARG"
+      fi;;
     h) usage ;;
     *) usage ;;
   esac
 done
+
 
 CACHE=0
 
@@ -71,6 +83,10 @@ fi
 # Create the text
 OUTPUT=$(printf "%s" "$FEED" | xq --extract '//item[last()]' | w3m -T text/html -dump  | sed 's/\^//')
 
+if [ -n "$PRAYERFILE" ] ; then # If the user is using a prayer rule, prepend it
+  OUTPUT="Prayer Rule:\n$PRAYERFILE\n$OUTPUT"
+fi 
+
 if  [ -n "$INTERACTIVE" ] ; then # For interactive use, use a pager
   echo "$OUTPUT" | ${PAGER:-less}
   exit 0
@@ -89,5 +105,6 @@ if [ -z "$INTERACTIVE" ] && [ -z "$STATUS"  ] ; then # Normal colourized
   s/Commemorations/\x1b[30;44mCommemorations\x1b[0m/
   s/Feasts/\x1b[30;44mFeasts\x1b[0m/
   s/Scripture Readings/\x1b[30;44mScripture Readings\x1b[0m/
+  s/Prayer Rule/\x1b[30;44mPrayer Rule\x1b[0m/
   '
 fi
