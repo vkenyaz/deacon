@@ -2,8 +2,7 @@
 
 Utility that fetches daily Orthodox readings and fasting information, supporting
 both Julian and Gregorian calendars, for interactive or automated use. This
-script essentially parses RSS feeds provided by https://orthocal.info using
-'xq'.
+script essentially parses RSS feeds provided by https://orthocal.info.
 
 *Why did you make this?*
 
@@ -63,6 +62,12 @@ deacon -g
 
 deacon -ji -p seraphim
 ```
+## Dependencies
+
+- xmlstarlet
+- curl
+- w3m
+
 ## INFO
 Website: https://vilyaem.xyz
 
