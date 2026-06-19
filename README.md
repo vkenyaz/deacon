@@ -29,6 +29,8 @@ that job great enough.
 
 <a href="https://asciinema.org/a/g8gkNIB79kWky41r" target="_blank"><img src="https://asciinema.org/a/g8gkNIB79kWky41r.svg" /></a>
 
+![A mobile screenshot of deacon.](screenshot.png)
+
 ## Try it!
 
 ```
@@ -47,7 +49,7 @@ cd ~/.local/bin/ && curl -OfsSL "https://codeberg.org/knyz/deacon/raw/branch/mas
   -i - interactive, uses PAGER to read text
   -s - status bar mode, outputs minimal information
   -h - display this information"
-  -p - Use a prayer rule, which are plaintext files in ~/.local/share/prayers/
+  -p - Use a prayer rule, which are plaintext files in ~/.local/share/vlmtools/prayers/
 ```
 ## Examples
 ```
