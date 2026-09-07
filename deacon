@@ -81,7 +81,7 @@ else
 fi
 
 # Create the text
-OUTPUT=$(printf "%s" "$FEED" | xmlstarlet sel --template --copy-of '//item[last()]' | xmlstarlet unescape | w3m -T text/html -dump  | sed 's/\^//')
+OUTPUT=$(printf "%s" "$FEED" | xmlstarlet sel --template --copy-of '//item[last()]' | xmlstarlet unescape | w3m -T text/html -dump  | sed 's/\^//' | grep -Fv -e 'http' -e 'orthodoxchristian')
 
 if [ -n "$PRAYERFILE" ] ; then # If the user is using a prayer rule, prepend it
   OUTPUT="Prayer Rule:\n$PRAYERFILE\n$OUTPUT"
